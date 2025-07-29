@@ -1,0 +1,15 @@
+port: "8080"
+adminToken: "gkxt67edsgak53s"
+postgres:
+  host: "postgres"
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
+  dbname: "postgres"
+  sslmode: "disable"
+redis:
+  host: "redis"
+  port: "6379"
+  password: ""
+  db: "0"
+# localhost

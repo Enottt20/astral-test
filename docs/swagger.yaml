@@ -1,0 +1,240 @@
+definitions:
+  domain.AuthRequest:
+    properties:
+      login:
+        type: string
+      pswd:
+        type: string
+    required:
+    - login
+    - pswd
+    type: object
+  domain.DataResponse:
+    properties:
+      data: {}
+    type: object
+  domain.ErrorInfo:
+    properties:
+      code:
+        type: integer
+      text:
+        type: string
+    type: object
+  domain.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/domain.ErrorInfo'
+    type: object
+  domain.RegisterRequest:
+    properties:
+      login:
+        minLength: 8
+        type: string
+      pswd:
+        minLength: 8
+        type: string
+      token:
+        type: string
+    required:
+    - login
+    - pswd
+    - token
+    type: object
+  domain.Response:
+    properties:
+      response: {}
+    type: object
+info:
+  contact: {}
+paths:
+  /api/auth:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user and returns JWT
+      parameters:
+      - description: User credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Authenticate user
+      tags:
+      - auth
+  /api/docs:
+    get:
+      description: Retrieves list of documents
+      parameters:
+      - description: Authorization token
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: Filter by login
+        in: query
+        name: login
+        type: string
+      - description: Metadata key
+        in: query
+        name: key
+        type: string
+      - description: Metadata value
+        in: query
+        name: value
+        type: string
+      - description: Limit number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.DataResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Get documents
+      tags:
+      - documents
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a document with metadata
+      parameters:
+      - description: Authorization token
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: File
+        in: formData
+        name: file
+        type: file
+      - description: Metadata
+        in: formData
+        name: meta
+        type: string
+      - description: Extra JSON
+        in: formData
+        name: json
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.DataResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Upload a document
+      tags:
+      - documents
+  /api/docs/{id}:
+    delete:
+      description: Deletes document by ID
+      parameters:
+      - description: Authorization token
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Delete a document
+      tags:
+      - documents
+    get:
+      description: Returns a document or its file
+      parameters:
+      - description: Authorization token
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.DataResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Get document by ID
+      tags:
+      - documents
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers user and returns login
+      parameters:
+      - description: User credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
+swagger: "2.0"
