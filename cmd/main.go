@@ -24,25 +24,16 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "github.com/Enottt20/astral-test/docs" // swag docs генерируются сюда
+	_ "github.com/Enottt20/astral-test/docs"
 )
 
 func main() {
-	// Логгер в JSON формате
 	logrus.SetFormatter(&logrus.JSONFormatter{PrettyPrint: true})
 
-	// Загрузка конфига
 	if err := InitConfig(); err != nil {
 		logrus.Fatalf("Failed to load config: %s", err.Error())
 	}
 
-	// Настройка Swagger BasePath (если есть префикс API)
-	// Например, если все роуты начинаются с /api, то:
-	// docs.SwaggerInfo.BasePath = "/api"
-	// Если нет - оставь "/"
-	// docs.SwaggerInfo.BasePath = "/"
-
-	// Подключение к Postgres
 	db, err := storage.NewPostgresDB(storage.PostgresConfig{
 		Host:     viper.GetString("postgres.host"),
 		Port:     viper.GetString("postgres.port"),
@@ -56,7 +47,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// Миграции базы
 	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
 		logrus.Fatalf("Failed to create migrate driver: %s", err.Error())
@@ -74,7 +64,6 @@ func main() {
 		logrus.Fatalf("Migrations error: %s", err.Error())
 	}
 
-	// Репозиторий и Redis
 	repo := storage.NewRepository(db)
 
 	intRedisDB, err := strconv.Atoi(viper.GetString("redis.db"))
@@ -93,19 +82,15 @@ func main() {
 	}
 	defer cache.Close()
 
-	// Инициализация сервисов, эндпоинтов и сервера
 	services := service.NewService(repo, viper.GetString("adminToken"), cache)
 	endp := handler.NewEndpoint(services)
 
-	// Gin роутер
 	router := endp.InitRoutes()
 
-	// Добавляем Swagger UI роут
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	server := &astraltest.Server{}
 
-	// Запуск сервера в отдельной горутине
 	go func() {
 		port := viper.GetString("port")
 		logrus.Infof("Swagger docs available at: http://localhost:%s/swagger/index.html", port)
@@ -115,7 +100,6 @@ func main() {
 		}
 	}()
 
-	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
