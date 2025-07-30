@@ -1,4 +1,4 @@
-- **Запуск: `docker compose up --d`**
+- **Запуск: `docker compose up -d`**
 - **Swagger: http://localhost:8080/swagger/index.html**
 - **ТЗ: [Открыть задание (PDF)](docs/TestTask.pdf)**
 ```
